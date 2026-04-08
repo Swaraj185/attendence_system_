@@ -138,6 +138,51 @@ These can be changed in [backend/.env.example](/C:/Users/swara/OneDrive/Desktop/
 - Socket reconnect handling
 - API and socket error handling
 - Responsive layout
+  
+Consecutive Frame Recognition Logic
+
+To avoid flickering and false positives, the system does not mark attendance from a single frame result. Instead, it uses consecutive-frame validation.
+
+How it works
+
+Each frame is sent to the face recognition API.
+If the API returns:
+status === "matched"
+and similarity > 0.7
+then the matched counter increases.
+If the result is:
+not matched
+no face detected
+or similarity is <= 0.7
+then the matched counter resets and the failed counter increases.
+Decision rules
+
+If 5 consecutive matched frames are received:
+the person is considered recognized
+attendance is marked
+the UI shows:
+Name
+Confidence
+Status: Recognized
+Attendance: Attendance Marked
+If 5 consecutive failed frames are received:
+the system stops detection
+the UI shows:
+Name: -
+Confidence: 0%
+Status: Not Detected
+Attendance: No new entry
+Why this logic is used
+
+prevents false attendance marking from a single noisy frame
+reduces UI flickering caused by mixed API responses
+gives more stable and reliable real-time recognition
+ensures attendance is marked only after repeated strong matches
+Confidence shown
+
+The displayed confidence is based on the accepted matched frame result from the recognition API.
+The API returns similarity in the range 0 to 1, and the UI converts it to percentage.
+
 
 ## Notes
 
